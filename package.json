@@ -1,0 +1,49 @@
+{
+  "name": "vite-plugin-eleventy",
+  "version": "0.0.0",
+  "description": "A Vite plugin to build your site with 11ty",
+  "main": "index.js",
+  "scripts": {
+    "lint": "run-p *:lint",
+    "fix": "run-p *:fix",
+    "js:lint": "eslint .",
+    "js:fix": "eslint . --fix",
+    "prettier:lint": "prettier --check .",
+    "prettier:fix": "prettier --write .",
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Snugug/vite-plugin-eleventy.git"
+  },
+  "keywords": [
+    "vite-plugin",
+    "eleventy"
+  ],
+  "author": "Sam Richard",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Snugug/vite-plugin-eleventy/issues"
+  },
+  "homepage": "https://github.com/Snugug/vite-plugin-eleventy#readme",
+  "dependencies": {
+    "@11ty/eleventy": "^1.0.0-canary.21",
+    "chalk": "^4.1.1",
+    "del": "^6.0.0",
+    "delete-empty": "^3.0.0",
+    "fast-glob": "^3.2.5"
+  },
+  "devDependencies": {
+    "eslint": "^7.26.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.3.0"
+  },
+  "volta": {
+    "node": "14.17.0"
+  }
+}
