@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-eleventy",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A Vite plugin to build your site with 11ty",
   "main": "index.js",
   "scripts": {
