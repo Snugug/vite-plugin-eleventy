@@ -4,7 +4,7 @@ const del = require('del');
 const deleteEmpty = require('delete-empty');
 const path = require('path');
 
-const eleventyPlugin = () => {
+const eleventyPlugin = (opts = {}) => {
   let config;
   let eleventy;
   let files = [];
@@ -35,8 +35,25 @@ const eleventyPlugin = () => {
       // On build, write files, glob the HTML, and add them to Build Rollup Options
       if (command === 'build') {
         await eleventy.write();
-        files = glob.sync(config.root + '/**/*.html').reduce((acc, cur) => {
-          let name = cur.replace(config.root, '').replace('/index.html', '');
+
+        // Set up options!
+        const options = Object.assign(
+          {
+            glob: config.root + '/**/*.html',
+            replace: [
+              [config.root, ''],
+              ['/index.html', ''],
+            ],
+          },
+          opts,
+        );
+
+        files = glob.sync(options.glob).reduce((acc, cur) => {
+          let name = cur;
+
+          for (const r of options.replace) {
+            name = name.replace(r[0], r[1]);
+          }
 
           name = name.startsWith('/') ? name.substring(1) : name;
 
