@@ -1,4 +1,4 @@
-const EleventyJSONWatch = require('./Eleventy');
+const EleventyJSONWatch = require('./lib/Eleventy');
 const glob = require('fast-glob');
 const del = require('del');
 const deleteEmpty = require('delete-empty');
