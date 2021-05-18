@@ -100,17 +100,14 @@ const eleventyPlugin = (opts = {}) => {
     // Configures dev server to respond with virtual 11ty output
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        // Only respond if the header accepts HTML, may need to look into this later
-        if (req.headers.accept.includes('text/html')) {
-          // Need to grab the pathname, not the request url, to match against 11ty output
-          const { pathname } = req._parsedUrl;
+        // Need to grab the pathname, not the request url, to match against 11ty output
+        const { pathname } = req._parsedUrl;
+        const url = pathname.endsWith('/') ? pathname : `${pathname}/`;
 
-          const url = pathname.endsWith('/') ? pathname : `${pathname}/`;
-          const output = files.filter((r) => r.url === url);
-
-          if (output.length) {
-            return res.end(output[0].content);
-          }
+        // Find the file if it exists!
+        const output = files.find((r) => r.url === url);
+        if (output) {
+          return res.end(output.content);
         }
 
         return next();
