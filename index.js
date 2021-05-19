@@ -3,12 +3,14 @@ const glob = require('fast-glob');
 const del = require('del');
 const deleteEmpty = require('delete-empty');
 const path = require('path');
+const EventEmitter = require('events');
 
 const eleventyPlugin = (opts = {}) => {
   let config;
   let eleventy;
   let files = [];
   let formats = [];
+  const hmr = new EventEmitter();
 
   return {
     name: 'eleventy',
@@ -29,6 +31,7 @@ const eleventyPlugin = (opts = {}) => {
 
         eleventy.config.events.on('watchChange', (f) => {
           files = f;
+          hmr.emit('compiled', f);
         });
       }
 
@@ -85,11 +88,17 @@ const eleventyPlugin = (opts = {}) => {
     // Sends 11ty update HMR signal
     handleHotUpdate({ file, server }) {
       if (formats.includes(path.extname(file).substring(1))) {
-        eleventy.config.events.on('watchChange', (f) => {
+        hmr.once('compiled', (compiled) => {
+          const changed = compiled
+            .filter((f) => path.join(process.cwd(), f.inputPath) === file)
+            .map((f) => f.url);
+
           server.ws.send({
             type: 'custom',
             event: 'eleventy-update',
-            data: {},
+            data: {
+              changed,
+            },
           });
         });
 
