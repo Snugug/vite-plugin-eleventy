@@ -2,15 +2,12 @@ const EleventyJSONWatch = require('./lib/Eleventy');
 const glob = require('fast-glob');
 const del = require('del');
 const deleteEmpty = require('delete-empty');
-const path = require('path');
-const EventEmitter = require('events');
 
 const eleventyPlugin = (opts = {}) => {
   let config;
   let eleventy;
   let files = [];
-  let formats = [];
-  const hmr = new EventEmitter();
+  let s;
 
   return {
     name: 'eleventy',
@@ -22,7 +19,7 @@ const eleventyPlugin = (opts = {}) => {
       await eleventy.init();
 
       // Save formats for HMR later, but drop .html support
-      formats = eleventy.config.templateFormats.filter((f) => f !== 'html');
+      // formats = eleventy.config.templateFormats.filter((f) => f !== 'html');
 
       // On serve, set up watcher
       if (command === 'serve') {
@@ -31,7 +28,13 @@ const eleventyPlugin = (opts = {}) => {
 
         eleventy.config.events.on('watchChange', (f) => {
           files = f;
-          hmr.emit('compiled', f);
+          if (s.ws) {
+            s.ws.send({
+              type: 'full-reload',
+              event: 'eleventy-update',
+              data: {},
+            });
+          }
         });
       }
 
@@ -85,29 +88,9 @@ const eleventyPlugin = (opts = {}) => {
       await deleteEmpty(config.root);
     },
 
-    // Sends 11ty update HMR signal
-    handleHotUpdate({ file, server }) {
-      if (formats.includes(path.extname(file).substring(1))) {
-        hmr.once('compiled', (compiled) => {
-          const changed = compiled
-            .filter((f) => path.join(process.cwd(), f.inputPath) === file)
-            .map((f) => f.url);
-
-          server.ws.send({
-            type: 'custom',
-            event: 'eleventy-update',
-            data: {
-              changed,
-            },
-          });
-        });
-
-        return [];
-      }
-    },
-
     // Configures dev server to respond with virtual 11ty output
     configureServer(server) {
+      s = server;
       server.middlewares.use(async (req, res, next) => {
         // Need to grab the pathname, not the request url, to match against 11ty output
         const { pathname } = req._parsedUrl;
