@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/Snugug/vite-plugin-eleventy#readme",
   "dependencies": {
-    "@11ty/eleventy": "^1.0.0-canary.21",
+    "@11ty/eleventy": "^1.0.0-canary.37",
     "chalk": "^4.1.1",
     "del": "^6.0.0",
     "delete-empty": "^3.0.0",
