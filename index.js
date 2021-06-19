@@ -2,12 +2,19 @@ const EleventyJSONWatch = require('./lib/Eleventy');
 const glob = require('fast-glob');
 const del = require('del');
 const deleteEmpty = require('delete-empty');
+const { extname } = require('path');
 
 const eleventyPlugin = (opts = {}) => {
   let config;
   let eleventy;
   let files = [];
   let s;
+  const contentTypes = {
+    js: 'application/javascript',
+    css: 'text/css',
+    html: 'text/html',
+    json: 'application/json',
+  };
 
   return {
     name: 'eleventy',
@@ -99,7 +106,25 @@ const eleventyPlugin = (opts = {}) => {
         // Find the file if it exists!
         const output = files.find((r) => r.url === url);
         if (output) {
-          return res.end(output.content);
+          let ct = '';
+
+          // Manage transforms and content types
+          if ((extname(url) === '' && url.endsWith('/')) || extname(url) === '.html') {
+            // If it's an HTML file our a route, run it through transformIndexHtml
+            output.content = await server.transformIndexHtml(url, output.content, req.originalUrl);
+            ct = 'html';
+          } else {
+            // Otherwise, run it through transformRequest
+            output.content = await server.transformRequest(url, output.content, req.originalUrl);
+            ct = extname(url).replace('.', '');
+          }
+
+          return res
+            .writeHead(200, {
+              'Content-Length': Buffer.byteLength(output.content),
+              'Content-Type': contentTypes[ct] || 'text/plain',
+            })
+            .end(output.content);
         }
 
         return next();

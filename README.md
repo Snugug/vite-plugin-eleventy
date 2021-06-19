@@ -20,14 +20,6 @@ module.exports = {
 };
 ```
 
-Then, include the following JavaScript on any page you want to automatically reload when an Eleventy generated file is changed (like in a `type="module"` script block):
-
-```js
-if (import.meta.hot) {
-  import.meta.hot.on('eleventy-update', () => {});
-}
-```
-
 ## Config
 
 The following options are available for configuration; pass them in as an object when instantiating the plugin:
