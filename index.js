@@ -3,7 +3,24 @@ const del = require('del');
 const deleteEmpty = require('delete-empty');
 const { extname } = require('path');
 const path = require('path');
+const os = require('os');
 
+/**
+ * Normalizes a path to remove any `.` and `..` segments to their POSIX equivalents.
+ * Borrowed from Vite so this plugin doesn't need to depend on Vite
+ * @param {string} id - The path to normalize.
+ * @return {string} - The normalized path.
+ **/
+function normalizePath(id) {
+  return path.posix.normalize(os.platform() === 'win32' ? id.replace(/\\/g, '/') : id);
+}
+
+/**
+ * Vite plugin for Eleventy.
+ * @param {Object} opts - The options for the plugin.
+ * @param {Array.<string[]>} opts.replace - An array of arrays of strings representing path portions to be replaced when building Rollup output. First item should be find, second should be replace, assuming POSIX paths.
+ * @return {Object} - The plugin object.
+ **/
 const eleventyPlugin = (opts = {}) => {
   let config;
   let eleventy;
@@ -53,6 +70,8 @@ const eleventyPlugin = (opts = {}) => {
             outputPath = path.join(outputPath, 'index.html');
           }
 
+          outputPath = normalizePath(outputPath);
+
           return Object.assign({}, f, { outputPath });
         });
 
@@ -87,7 +106,8 @@ const eleventyPlugin = (opts = {}) => {
 
     configResolved(resolvedConfig) {
       // If the root changes, throw an error
-      if (path.resolve(base) !== resolvedConfig.root) {
+      const baseRoot = normalizePath(path.resolve(base));
+      if (baseRoot !== normalizePath(resolvedConfig.root)) {
         throw new Error(
           'A plugin has changed the Vite root after [vite-plugin-eleventy] has run. Please make sure any plugins that change the Vite root run before this one.',
         );
