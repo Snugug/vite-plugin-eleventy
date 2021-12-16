@@ -1,6 +1,4 @@
 const EleventyJSONWatch = require('./lib/Eleventy');
-const del = require('del');
-const deleteEmpty = require('delete-empty');
 const { extname } = require('path');
 const path = require('path');
 const os = require('os');
@@ -22,10 +20,11 @@ function normalizePath(id) {
  * @return {Object} - The plugin object.
  **/
 const eleventyPlugin = (opts = {}) => {
-  let config;
   let eleventy;
   let files = [];
   let output = [];
+  const outIDs = [];
+  const outFiles = [];
   let base;
 
   // Set up user options
@@ -47,7 +46,7 @@ const eleventyPlugin = (opts = {}) => {
     name: 'eleventy',
     enforce: 'pre',
 
-    // This _should_ be done in configResolved but we need to generate the HTML and the input files _before_ the config gets resolved. As a compromise, this an error will be thrown in configResolved if the root changes.
+    // This _should_ be done in configResolved but we need to generate the HTML and the input files _before_ the config gets resolved. As a compromise, an error will be thrown in configResolved if the root changes.
     async config(config, { command }) {
       // Determine Vite's root. Because it can be an absolute or relative path, we're `path.resolve`ing it, then figuring out the relative path because that's what Eleventy needs.
       base = config.root ? path.resolve(config.root) : process.cwd();
@@ -59,22 +58,6 @@ const eleventyPlugin = (opts = {}) => {
 
       // On build, write files, glob the HTML, and add them to Build Rollup Options
       if (command === 'build') {
-        await eleventy.write();
-
-        // Add outputPath to files, needed until https://github.com/11ty/eleventy/issues/1877 is resolved
-        // Will be removed once Eleventy supports it natively
-        // Only adds index.html if the file's URL doesn't already have an extension
-        files = files.map((f) => {
-          let outputPath = path.join(base, f.url);
-          if (path.extname(f.url) === '') {
-            outputPath = path.join(outputPath, 'index.html');
-          }
-
-          outputPath = normalizePath(outputPath);
-
-          return Object.assign({}, f, { outputPath });
-        });
-
         // Add relative path to replacements for build files.
         if (base !== '.') {
           options.replace.unshift([base, '']);
@@ -89,7 +72,11 @@ const eleventyPlugin = (opts = {}) => {
           }
           name = name.startsWith('/') ? name.substring(1) : name;
 
-          acc[name] = cur.outputPath;
+          cur.outId = path.join(process.cwd(), cur.outputPath);
+
+          acc[name] = cur.outId;
+          outIDs.push(cur.outId);
+          outFiles.push(cur);
           return acc;
         }, {});
 
@@ -112,13 +99,23 @@ const eleventyPlugin = (opts = {}) => {
           'A plugin has changed the Vite root after [vite-plugin-eleventy] has run. Please make sure any plugins that change the Vite root run before this one.',
         );
       }
-      config = resolvedConfig;
     },
 
-    // Clean up the compiled files and empty directories after stuff gets compiled
-    async closeBundle() {
-      await del(Object.values(output));
-      await deleteEmpty(config.root);
+    // Resolves IDs of files built by 11ty
+    resolveId(id) {
+      if (outIDs.includes(id)) {
+        return id;
+      }
+
+      return null;
+    },
+
+    // Loads files built by 11ty
+    load(id) {
+      if (outIDs.includes(id)) {
+        return outFiles.find((f) => f.outId === id).content;
+      }
+      return null;
     },
 
     // Configures dev server to respond with virtual 11ty output
@@ -136,6 +133,7 @@ const eleventyPlugin = (opts = {}) => {
         }
       });
 
+      // Setup Vite dev server middlware to respond with virtual 11ty output
       server.middlewares.use(async (req, res, next) => {
         // Need to grab the pathname, not the request url, to match against 11ty output
         const { pathname } = req._parsedUrl;
@@ -148,7 +146,7 @@ const eleventyPlugin = (opts = {}) => {
 
           // Manage transforms and content types
           if ((extname(url) === '' && url.endsWith('/')) || extname(url) === '.html') {
-            // If it's an HTML file our a route, run it through transformIndexHtml
+            // If it's an HTML file or a route, run it through transformIndexHtml
             output.content = await server.transformIndexHtml(url, output.content, req.originalUrl);
             ct = 'html';
           } else {

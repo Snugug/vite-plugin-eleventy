@@ -2,11 +2,13 @@
 
 Vite plugin to build out your site with [Eleventy](http://11ty.io/). Allows you to use the power of 11ty to build your HTML without needing to compile it to disk during development.
 
-## THIS IS SUPER ALPHA SOFTWARE
+## This is Beta software
 
-This is more of a proof of concept than something you should rely on for production. It requires the canary build of 11ty and I can't guarantee it'll work with all 11ty setups and plugins. It also **won't** work with HTML files, at all. Don't use HTML files, either hand-written or with 11ty, with this plugin. If you're writing Nunjucks, use `.njk`, not `.html`, for instance. Don't rely on 11ty's default template handling for HTML files is what I'm saying.
+This plugin relies on Eleventy 1.0, which is currently in beta. If you're experiencing issues, please make sure it works on the latest Eleventy beta first. A stable release of this plugin isn't likely until Eleventy 1.0 is fully released.
 
-Don't expect something resembling a stable release until at least Eleventy 1.0 is released.
+Due to the nature of integrating Vite with Eleventy, not all Eleventy setups and plugins are guaranteed to work; when in doubt, consider moving to Vite plugins from Eleventy plugins (for instance, instead of using Eleventy [transforms](https://www.11ty.dev/docs/config/#transforms), consider writing/using a [PostHTML](https://github.com/posthtml/posthtml) plugin with [Vite Plugin PostHTML](https://www.npmjs.com/package/vite-plugin-posthtml)).
+
+Finally, because Vite has built-in handling for HTML files, it's recommended to _not_ use `.html` files with Eleventy. If you're writing Nunjucks, for instance, use `.njk` instead of `.html`. Don't rely on Eleventy's default template handling for HTML files is what I'm saying.
 
 ## Usage
 
@@ -24,10 +26,8 @@ module.exports = {
 
 The following options are available for configuration; pass them in as an object when instantiating the plugin:
 
-- `glob` - The glob string or array of globs to use for Eleventy generated files. Matched files will be added to Vite's `rollupOptions.input` and deleted when building using Vite. Any valid [fast glob](https://www.npmjs.com/package/fast-glob) pattern will work here. Defaults to `viteConfig.root + '/**/*.html'`
 - `replace` - Array of arrays representing replacements to be made to a glob'd path to generate an input name for Rollup. Internal arrays are in the form of `[find, replace]`. Will be passed to `string.replace`. Defaults to `[[viteConfig.root, ''], ['/index.html', '']]`
 
 ## Important Eleventy differences
 
-- This plugin overrides Eleventy's input and output directories with Vite's root directory configuration. If you want to change where files live, you need to change Vite's root. This also means your 11ty template and include directories are relative to the Vite root. This also means you need to _not_ rely on Vite plugins to set your project root.
-- There is no output 11ty during development. During a production build, 11ty generated files will be put into your Vite root directory, then cleaned up once the build is done. For this stage, **only HTML output is supported**. I know 11ty can output different kinds of files, and maybe that'll be a future enhancement, but for now, only HTML output is supported.
+- This plugin overrides Eleventy's input and output directories with Vite's root directory configuration. If you want to change where files live, you need to change Vite's root. This also means your 11ty template and include directories are relative to the Vite root. This also means you need to _not_ rely on Vite plugins to set your project root. Further testing will determine if this changes in the future.
