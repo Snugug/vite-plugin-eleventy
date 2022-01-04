@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-eleventy",
-  "version": "0.0.6",
+  "version": "0.0.9",
   "description": "A Vite plugin to build your site with 11ty",
   "main": "index.js",
   "scripts": {
@@ -28,11 +28,8 @@
   },
   "homepage": "https://github.com/Snugug/vite-plugin-eleventy#readme",
   "dependencies": {
-    "@11ty/eleventy": "^1.0.0-canary.21",
-    "chalk": "^4.1.1",
-    "del": "^6.0.0",
-    "delete-empty": "^3.0.0",
-    "fast-glob": "^3.2.5"
+    "@11ty/eleventy": "^1.0.0-canary.46",
+    "chalk": "^4.1.1"
   },
   "devDependencies": {
     "eslint": "^7.26.0",
