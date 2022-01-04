@@ -143,24 +143,25 @@ const eleventyPlugin = (opts = {}) => {
         const output = files.find((r) => r.url === url);
         if (output) {
           let ct = '';
+          let content = '' + output.content;
 
           // Manage transforms and content types
           if ((extname(url) === '' && url.endsWith('/')) || extname(url) === '.html') {
             // If it's an HTML file or a route, run it through transformIndexHtml
-            output.content = await server.transformIndexHtml(url, output.content, req.originalUrl);
+            content = await server.transformIndexHtml(url, content, req.originalUrl);
             ct = 'html';
           } else {
             // Otherwise, run it through transformRequest
-            output.content = await server.transformRequest(url, output.content, req.originalUrl);
+            content = await server.transformRequest(url, content, req.originalUrl);
             ct = extname(url).replace('.', '');
           }
 
           return res
             .writeHead(200, {
-              'Content-Length': Buffer.byteLength(output.content),
+              'Content-Length': Buffer.byteLength(content),
               'Content-Type': contentTypes[ct] || 'text/plain',
             })
-            .end(output.content);
+            .end(content);
         }
 
         return next();
