@@ -2,13 +2,10 @@
 
 Vite plugin to build out your site with [Eleventy](http://11ty.io/). Allows you to use the power of 11ty to build your HTML without needing to compile it to disk during development.
 
-## This is Beta software
+## Important Integration Caveats
 
-This plugin relies on Eleventy 1.0, which is currently in beta. If you're experiencing issues, please make sure it works on the latest Eleventy beta first. A stable release of this plugin isn't likely until Eleventy 1.0 is fully released.
-
-Due to the nature of integrating Vite with Eleventy, not all Eleventy setups and plugins are guaranteed to work; when in doubt, consider moving to Vite plugins from Eleventy plugins (for instance, instead of using Eleventy [transforms](https://www.11ty.dev/docs/config/#transforms), consider writing/using a [PostHTML](https://github.com/posthtml/posthtml) plugin with [Vite Plugin PostHTML](https://www.npmjs.com/package/vite-plugin-posthtml)).
-
-Finally, because Vite has built-in handling for HTML files, it's recommended to _not_ use `.html` files with Eleventy. If you're writing Nunjucks, for instance, use `.njk` instead of `.html`. Don't rely on Eleventy's default template handling for HTML files is what I'm saying.
+- Due to the nature of integrating Vite with Eleventy, not all Eleventy setups and plugins are guaranteed to work; when in doubt, consider moving to Vite plugins from Eleventy plugins (for instance, instead of using Eleventy [transforms](https://www.11ty.dev/docs/config/#transforms), consider writing/using a [PostHTML](https://github.com/posthtml/posthtml) plugin with [Vite Plugin PostHTML](https://www.npmjs.com/package/vite-plugin-posthtml)).
+- Because Vite has built-in handling for HTML files, it's recommended to _not_ use `.html` files with Eleventy. If you're writing Nunjucks, for instance, use `.njk` instead of `.html`. Don't rely on Eleventy's default template handling for HTML files is what I'm saying.
 
 ## Usage
 
@@ -24,7 +21,9 @@ module.exports = {
 
 ## Config
 
-The following options are available for configuration; pass them in as an object when instantiating the plugin:
+Use an [`.eleventy.js`](https://www.11ty.dev/docs/config/) configuration file to configure Eleventy.
+
+Additionally, the following options are available for configuration; pass them in as an object when instantiating the plugin:
 
 - `replace` - Array of arrays representing replacements to be made to a glob'd path to generate an input name for Rollup. Internal arrays are in the form of `[find, replace]`. Will be passed to `string.replace`. Defaults to `[[viteConfig.root, ''], ['/index.html', '']]`
 
